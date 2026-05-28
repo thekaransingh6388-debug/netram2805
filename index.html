@@ -16,13 +16,12 @@
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '2193719711415469');
+        fbq('init', '2080027469608909');
         fbq('track', 'PageView');
     </script>
-    <noscript>
-        <img height="1" width="1" style="display:none"
-        src="https://www.facebook.com/tr?id=2193719711415469&ev=PageView&noscript=1"/>
-    </noscript>
+    <noscript><img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=2080027469608909&ev=PageView&noscript=1"
+    /></noscript>
     <!-- End Meta Pixel Code -->
     
     <style>
@@ -178,6 +177,39 @@
             margin: 1rem 0 0.5rem;
         }
 
+        .subscribe-wrapper {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .subscribe-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: linear-gradient(100deg, #8B0000, #b91c1c, #dc2626);
+            border: none;
+            padding: 1rem 1.2rem;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(220, 38, 38, 0.5);
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            font-family: inherit;
+        }
+        .subscribe-btn:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(100deg, #b91c1c, #dc2626, #ef4444);
+            box-shadow: 0 15px 28px -5px black;
+        }
+        .subscribe-btn:active {
+            transform: translateY(2px);
+        }
+
         .footer-note {
             font-size: 0.7rem;
             text-align: center;
@@ -194,7 +226,7 @@
             .channel-name {
                 font-size: 1.6rem;
             }
-            .tele-btn {
+            .tele-btn, .subscribe-btn {
                 font-size: 1rem;
                 padding: 0.85rem 1rem;
             }
@@ -211,9 +243,9 @@
     <div class="channel-name">PANKAJ BHARDWAJ</div>
     <div class="badge"><span>⚡ NIFTY • BANKNIFTY • OPTIONS ⚡</span></div>
     
-    <!-- FIRST BUTTON -->
+    <!-- FIRST BUTTON (Telegram Join) -->
     <div class="btn-first">
-        <a href="https://t.me/+RwxnodUJdmA5Mjg1" target="_blank" rel="noopener noreferrer" class="tele-btn" data-track="join_top">
+        <a href="https://t.me/+TSFVltHIqv4xMDM1" target="_blank" rel="noopener noreferrer" class="tele-btn" data-track="join_top">
             <span class="telegram-icon">📲</span> JOIN TELEGRAM CHANNEL
             <span>🚀</span>
         </a>
@@ -237,12 +269,19 @@
         </div>
     </div>
     
-    <!-- SECOND BUTTON -->
+    <!-- SECOND BUTTON (Telegram Join) -->
     <div class="btn-last">
-        <a href="https://t.me/+RwxnodUJdmA5Mjg1" target="_blank" rel="noopener noreferrer" class="tele-btn" data-track="join_bottom">
+        <a href="https://t.me/+TSFVltHIqv4xMDM1" target="_blank" rel="noopener noreferrer" class="tele-btn" data-track="join_bottom">
             <span class="telegram-icon">⚡</span> JOIN TELEGRAM NOW
             <span>💎</span>
         </a>
+    </div>
+
+    <!-- NEW SUBSCRIBE BUTTON with Meta Pixel event -->
+    <div class="subscribe-wrapper">
+        <button id="subscribeButton" class="subscribe-btn" data-track="subscribe_click">
+            🔔 SUBSCRIBE TO UPDATES 🔔
+        </button>
     </div>
     
     <div class="footer-note">
@@ -253,81 +292,146 @@
 
 <script>
     (function() {
-        // Ensure fbq is loaded and ready
+        // Target Telegram link for both join buttons (updated)
+        const TELEGRAM_LINK = "https://t.me/+TSFVltHIqv4xMDM1";
+        
+        // Update any existing telegram buttons if link differs (safety)
+        const allTeleButtons = document.querySelectorAll('.tele-btn');
+        allTeleButtons.forEach(btn => {
+            if (btn.getAttribute('href') !== TELEGRAM_LINK) {
+                btn.setAttribute('href', TELEGRAM_LINK);
+            }
+        });
+        
+        // Ensure fbq is ready and robust
+        function safeFbq() {
+            if (typeof fbq !== 'undefined' && fbq !== null) {
+                return fbq;
+            }
+            // fallback (no-op but logs)
+            return function() { console.log('fbq fallback:', arguments); };
+        }
+        
+        // Track Telegram clicks with Meta Pixel (Lead event + custom)
         function trackTelegramClick(event) {
-            // Prevent multiple rapid clicks (optional)
+            // Simple debounce to avoid double tracking on quick clicks
             if (this._tracked) return;
             this._tracked = true;
-            setTimeout(() => { this._tracked = false; }, 500);
+            setTimeout(() => { this._tracked = false; }, 600);
             
             try {
-                if (typeof fbq !== 'undefined' && fbq !== null) {
-                    // Track as Lead (best for Telegram joins)
-                    fbq('track', 'Lead', {
-                        content_name: 'Telegram_Join',
+                const fbqFunc = safeFbq();
+                if (typeof fbqFunc === 'function') {
+                    // Lead event for conversion tracking (standard event)
+                    fbqFunc('track', 'Lead', {
+                        content_name: 'Telegram_Join_Channel',
                         content_category: 'Telegram_Button',
-                        content_type: 'telegram_channel',
+                        content_type: 'telegram_invite',
                         value: 1,
                         currency: 'INR'
                     });
-                    
-                    // Also track as custom event for better visibility in Ads Manager
-                    fbq('trackCustom', 'TelegramJoinClick', {
-                        button_location: this.getAttribute('data-track') || 'unknown'
+                    // Custom event for granular reporting
+                    fbqFunc('trackCustom', 'TelegramJoinClick', {
+                        button_location: this.getAttribute('data-track') || 'telegram_button',
+                        destination: 'telegram_group'
                     });
-                    
-                    console.log('✅ Pixel tracked successfully for:', this.getAttribute('data-track'));
+                    console.log('✅ Meta Pixel tracked: Telegram Join from', this.getAttribute('data-track'));
                 } else {
-                    console.warn('⚠️ fbq not loaded yet, retrying...');
-                    // Retry after 200ms if fbq not ready
-                    setTimeout(() => {
-                        if (typeof fbq !== 'undefined' && fbq !== null) {
-                            fbq('track', 'Lead', {
-                                content_name: 'Telegram_Join_Retry',
-                                content_category: 'Telegram_Button'
-                            });
-                            console.log('✅ Pixel tracked (retry)');
-                        }
-                    }, 200);
+                    console.warn('fbq not defined, but link opens normally');
                 }
             } catch(e) {
-                console.error('Pixel tracking error:', e);
+                console.error('Pixel tracking error (Telegram):', e);
             }
-            
-            // Let the link open normally (no return false)
+            // Allow navigation (default behavior)
             return true;
         }
         
-        // Find all Telegram buttons
-        const buttons = document.querySelectorAll('.tele-btn');
+        // Subscribe button tracking + custom action (show alert & track)
+        function handleSubscribeClick(event) {
+            // Track the subscribe button click via Meta Pixel
+            try {
+                const fbqFunc = safeFbq();
+                if (typeof fbqFunc === 'function') {
+                    // Standard 'Subscribe' event or we use 'Lead' + custom for clarity
+                    fbqFunc('track', 'Subscribe', {
+                        content_name: 'Notification_Subscribe',
+                        content_category: 'User_Action',
+                        predicted_ltv: 0.5,
+                        currency: 'INR'
+                    });
+                    // Also custom event for deeper insight
+                    fbqFunc('trackCustom', 'SubscribeButtonClick', {
+                        button_location: this.getAttribute('data-track') || 'subscribe_section',
+                        source: 'pankaj_bhardwaj_page'
+                    });
+                    console.log('✅ Meta Pixel tracked: Subscribe Button Click');
+                }
+            } catch(e) {
+                console.error('Pixel tracking error (Subscribe):', e);
+            }
+            
+            // Provide feedback to user: subscribe simulation (info message)
+            // This mimics a 'subscribe to updates' feature without needing backend.
+            // For better user experience, we show a confirmation alert but do not redirect.
+            alert("🎉 Thank you for subscribing! You'll now receive premium stock market updates & daily calls from PANKAJ BHARDWAJ.\n\n✅ Stay tuned for NIFTY/BANKNIFTY insights!");
+            
+            // Optional: Could store a cookie or localStorage but not needed for demo.
+            // No redirection; stays on page.
+        }
         
-        buttons.forEach(function(button) {
-            // Remove existing listeners to avoid duplicates
-            button.removeEventListener('click', trackTelegramClick);
-            // Add fresh listener
-            button.addEventListener('click', trackTelegramClick);
+        // Attach event listeners to Telegram buttons (both)
+        const telegramBtns = document.querySelectorAll('.tele-btn');
+        telegramBtns.forEach(btn => {
+            btn.removeEventListener('click', trackTelegramClick);
+            btn.addEventListener('click', trackTelegramClick);
         });
         
-        // Additional: Track when page fully loads
+        // Attach Subscribe button listener
+        const subscribeBtn = document.getElementById('subscribeButton');
+        if (subscribeBtn) {
+            subscribeBtn.removeEventListener('click', handleSubscribeClick);
+            subscribeBtn.addEventListener('click', handleSubscribeClick);
+        }
+        
+        // PageView re-track on load for consistency
         window.addEventListener('load', function() {
-            if (typeof fbq !== 'undefined') {
+            if (typeof fbq !== 'undefined' && fbq !== null) {
                 fbq('track', 'PageView');
-                console.log('✅ PageView retracked on load');
+                console.log('✅ Additional PageView tracked on load');
+            }
+            
+            // Also track custom event for landing page view
+            if (typeof fbq !== 'undefined' && fbq !== null) {
+                fbq('trackCustom', 'LandingPageViewed', {
+                    page_section: 'pankaj_bhardwaj_elite',
+                    device: /Mobile|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+                });
             }
         });
         
-        console.log('🚀 Tracking ready —', buttons.length, 'Telegram buttons configured');
+        console.log('🚀 All events active | Telegram link updated: ', TELEGRAM_LINK);
     })();
 </script>
 
-<!-- Fallback: Ensure fbq is defined even if Meta pixel script fails -->
+<!-- Fallback: Ensure fbq is never undefined, plus extra safety for Meta Pixel loading -->
 <script>
-    if (typeof fbq === 'undefined') {
-        window.fbq = function() {
-            console.log('Fallback fbq:', arguments);
-        };
-        console.warn('Meta Pixel script not loaded, using fallback');
-    }
+    (function() {
+        if (typeof fbq === 'undefined') {
+            window.fbq = function() {
+                console.warn('Fallback fbq called with args:', arguments);
+            };
+            console.warn('Meta Pixel fallback initialized (fbq not loaded correctly)');
+        }
+        
+        // Additional listener for dynamic or third-party scripts - nothing heavy
+        // Ensure telegram links open in new tab securely (already has target="_blank")
+        const allExternalLinks = document.querySelectorAll('a[href*="t.me"]');
+        allExternalLinks.forEach(link => {
+            if (!link.hasAttribute('rel')) {
+                link.setAttribute('rel', 'noopener noreferrer');
+            }
+        });
+    })();
 </script>
 
 </body>
