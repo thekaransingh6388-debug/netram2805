@@ -243,9 +243,9 @@
     <div class="channel-name">PANKAJ BHARDWAJ</div>
     <div class="badge"><span>⚡ NIFTY • BANKNIFTY • OPTIONS ⚡</span></div>
     
-    <!-- FIRST BUTTON (Telegram Join) -->
+    <!-- BUTTON 1: Telegram Join (Top) -->
     <div class="btn-first">
-        <a href="https://t.me/+TSFVltHIqv4xMDM1" target="_blank" rel="noopener noreferrer" class="tele-btn" data-track="join_top">
+        <a href="https://t.me/+3rFqfNFuc8dlZWRl" target="_blank" rel="noopener noreferrer" class="tele-btn" data-track="join_top">
             <span class="telegram-icon">📲</span> JOIN TELEGRAM CHANNEL
             <span>🚀</span>
         </a>
@@ -269,15 +269,15 @@
         </div>
     </div>
     
-    <!-- SECOND BUTTON (Telegram Join) -->
+    <!-- BUTTON 2: Telegram Join (Bottom) -->
     <div class="btn-last">
-        <a href="https://t.me/+TSFVltHIqv4xMDM1" target="_blank" rel="noopener noreferrer" class="tele-btn" data-track="join_bottom">
+        <a href="https://t.me/+3rFqfNFuc8dlZWRl" target="_blank" rel="noopener noreferrer" class="tele-btn" data-track="join_bottom">
             <span class="telegram-icon">⚡</span> JOIN TELEGRAM NOW
             <span>💎</span>
         </a>
     </div>
 
-    <!-- NEW SUBSCRIBE BUTTON with Meta Pixel event -->
+    <!-- BUTTON 3: SUBSCRIBE BUTTON (Custom action with Meta Pixel tracking) -->
     <div class="subscribe-wrapper">
         <button id="subscribeButton" class="subscribe-btn" data-track="subscribe_click">
             🔔 SUBSCRIBE TO UPDATES 🔔
@@ -292,147 +292,181 @@
 
 <script>
     (function() {
-        // Target Telegram link for both join buttons (updated)
-        const TELEGRAM_LINK = "https://t.me/+TSFVltHIqv4xMDM1";
+        // THE CORRECT TELEGRAM CHANNEL LINK (Applied to all three buttons: button1, button2, and also the subscribe button is separate, but we ensure telegram buttons have this exact link)
+        const TELEGRAM_LINK = "https://t.me/+3rFqfNFuc8dlZWRl";
         
-        // Update any existing telegram buttons if link differs (safety)
+        // Force update any telegram button to use the exact link (ensures both existing and any dynamic ones)
         const allTeleButtons = document.querySelectorAll('.tele-btn');
         allTeleButtons.forEach(btn => {
             if (btn.getAttribute('href') !== TELEGRAM_LINK) {
                 btn.setAttribute('href', TELEGRAM_LINK);
             }
+            // Also ensure rel and target are correct
+            btn.setAttribute('target', '_blank');
+            btn.setAttribute('rel', 'noopener noreferrer');
         });
         
-        // Ensure fbq is ready and robust
+        // Meta Pixel safety wrapper
         function safeFbq() {
-            if (typeof fbq !== 'undefined' && fbq !== null) {
+            if (typeof fbq !== 'undefined' && fbq !== null && typeof fbq === 'function') {
                 return fbq;
             }
-            // fallback (no-op but logs)
-            return function() { console.log('fbq fallback:', arguments); };
+            // fallback function that logs but doesn't break
+            return function() { console.log('Meta Pixel fallback (fbq missing):', arguments); };
         }
         
-        // Track Telegram clicks with Meta Pixel (Lead event + custom)
+        // Track Telegram button clicks (Lead + Custom Event)
         function trackTelegramClick(event) {
-            // Simple debounce to avoid double tracking on quick clicks
+            // Simple debounce to prevent double events on fast clicks
             if (this._tracked) return;
             this._tracked = true;
-            setTimeout(() => { this._tracked = false; }, 600);
+            setTimeout(() => { this._tracked = false; }, 500);
             
             try {
                 const fbqFunc = safeFbq();
                 if (typeof fbqFunc === 'function') {
-                    // Lead event for conversion tracking (standard event)
+                    // Standard Lead event for conversion tracking
                     fbqFunc('track', 'Lead', {
-                        content_name: 'Telegram_Join_Channel',
-                        content_category: 'Telegram_Button',
-                        content_type: 'telegram_invite',
+                        content_name: 'Telegram_Channel_Join',
+                        content_category: 'Telegram_Invite',
+                        content_type: 'telegram_group',
                         value: 1,
-                        currency: 'INR'
+                        currency: 'INR',
+                        method: 'click',
+                        telegram_link: TELEGRAM_LINK.substring(0, 30) + '...'
                     });
-                    // Custom event for granular reporting
+                    // Custom event for detailed analytics
                     fbqFunc('trackCustom', 'TelegramJoinClick', {
-                        button_location: this.getAttribute('data-track') || 'telegram_button',
-                        destination: 'telegram_group'
+                        button_location: this.getAttribute('data-track') || 'telegram_unknown',
+                        destination_type: 'telegram_channel',
+                        timestamp: new Date().toISOString()
                     });
                     console.log('✅ Meta Pixel tracked: Telegram Join from', this.getAttribute('data-track'));
                 } else {
-                    console.warn('fbq not defined, but link opens normally');
+                    console.warn('fbq not available, Telegram link will open normally');
                 }
             } catch(e) {
-                console.error('Pixel tracking error (Telegram):', e);
+                console.error('Pixel error (Telegram):', e);
             }
-            // Allow navigation (default behavior)
+            // allow the default link behavior
             return true;
         }
         
-        // Subscribe button tracking + custom action (show alert & track)
+        // Handle Subscribe button: track pixel event, show thank you message (No redirection)
         function handleSubscribeClick(event) {
-            // Track the subscribe button click via Meta Pixel
+            // 1) Track using Meta Pixel (Subscribe standard event + custom)
             try {
                 const fbqFunc = safeFbq();
                 if (typeof fbqFunc === 'function') {
-                    // Standard 'Subscribe' event or we use 'Lead' + custom for clarity
+                    // Standard Meta 'Subscribe' event (great for subscription tracking)
                     fbqFunc('track', 'Subscribe', {
-                        content_name: 'Notification_Subscribe',
-                        content_category: 'User_Action',
+                        content_name: 'PANKAJ_BHARDWAJ_Updates',
+                        content_category: 'Market_Insights',
                         predicted_ltv: 0.5,
-                        currency: 'INR'
+                        currency: 'INR',
+                        value: 0,
+                        status: 'subscribed'
                     });
-                    // Also custom event for deeper insight
-                    fbqFunc('trackCustom', 'SubscribeButtonClick', {
-                        button_location: this.getAttribute('data-track') || 'subscribe_section',
-                        source: 'pankaj_bhardwaj_page'
+                    // Custom event for deeper segment
+                    fbqFunc('trackCustom', 'SubscribeButtonInteraction', {
+                        button_id: 'subscribeButton',
+                        location: 'post_telegram_buttons',
+                        user_action: 'click_subscribe',
+                        page_section: 'stock_market_elite'
                     });
-                    console.log('✅ Meta Pixel tracked: Subscribe Button Click');
+                    console.log('✅ Meta Pixel tracked: Subscribe Button Click (with standard Subscribe event)');
+                } else {
+                    console.warn('fbq not available for subscribe tracking');
                 }
             } catch(e) {
-                console.error('Pixel tracking error (Subscribe):', e);
+                console.error('Subscribe tracking error:', e);
             }
             
-            // Provide feedback to user: subscribe simulation (info message)
-            // This mimics a 'subscribe to updates' feature without needing backend.
-            // For better user experience, we show a confirmation alert but do not redirect.
-            alert("🎉 Thank you for subscribing! You'll now receive premium stock market updates & daily calls from PANKAJ BHARDWAJ.\n\n✅ Stay tuned for NIFTY/BANKNIFTY insights!");
+            // 2) Provide user feedback: subscription confirmation modal (using modern alert)
+            // This acts as a "Subscribe to updates" functionality. In real scenario could integrate email.
+            alert("✅ THANK YOU FOR SUBSCRIBING! ✅\n\nYou're now subscribed to PANKAJ BHARDWAJ's premium stock market updates.\n\n📊 Get daily NIFTY/BANKNIFTY calls, 80-90% accuracy, and exclusive trade setups.\n\n🚀 Stay tuned for market-moving insights!");
             
-            // Optional: Could store a cookie or localStorage but not needed for demo.
-            // No redirection; stays on page.
+            // Optional visual feedback: change button text temporarily
+            const subBtn = document.getElementById('subscribeButton');
+            if (subBtn) {
+                const originalText = subBtn.innerHTML;
+                subBtn.innerHTML = "✅ SUBSCRIBED! THANK YOU ✅";
+                subBtn.style.background = "linear-gradient(100deg, #166534, #15803d, #16a34a)";
+                subBtn.disabled = true;
+                setTimeout(() => {
+                    subBtn.innerHTML = originalText;
+                    subBtn.style.background = "linear-gradient(100deg, #8B0000, #b91c1c, #dc2626)";
+                    subBtn.disabled = false;
+                }, 3000);
+            }
         }
         
-        // Attach event listeners to Telegram buttons (both)
+        // Attach event listeners to both Telegram buttons
         const telegramBtns = document.querySelectorAll('.tele-btn');
         telegramBtns.forEach(btn => {
             btn.removeEventListener('click', trackTelegramClick);
             btn.addEventListener('click', trackTelegramClick);
         });
         
-        // Attach Subscribe button listener
+        // Attach Subscribe button handler
         const subscribeBtn = document.getElementById('subscribeButton');
         if (subscribeBtn) {
             subscribeBtn.removeEventListener('click', handleSubscribeClick);
             subscribeBtn.addEventListener('click', handleSubscribeClick);
         }
         
-        // PageView re-track on load for consistency
+        // Additional tracking: Page view enhanced + custom landing event
         window.addEventListener('load', function() {
-            if (typeof fbq !== 'undefined' && fbq !== null) {
+            if (typeof fbq !== 'undefined' && fbq !== null && typeof fbq === 'function') {
                 fbq('track', 'PageView');
-                console.log('✅ Additional PageView tracked on load');
+                // custom event for landing page engagement
+                fbq('trackCustom', 'EliteLandingPageView', {
+                    trader_name: 'PANKAJ_BHARDWAJ',
+                    offer_type: 'NIFTY_BANKNIFTY_OPTIONS',
+                    accuracy: '80-90%',
+                    daily_calls: '3-4'
+                });
+                console.log('✅ PageView & custom landing event tracked');
             }
             
-            // Also track custom event for landing page view
-            if (typeof fbq !== 'undefined' && fbq !== null) {
-                fbq('trackCustom', 'LandingPageViewed', {
-                    page_section: 'pankaj_bhardwaj_elite',
-                    device: /Mobile|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
-                });
-            }
+            // Also verify all telegram links are correctly set (double-check)
+            const checkTeleLinks = document.querySelectorAll('.tele-btn');
+            checkTeleLinks.forEach(link => {
+                if (link.getAttribute('href') !== "https://t.me/+3rFqfNFuc8dlZWRl") {
+                    console.warn('Fixing telegram link again');
+                    link.setAttribute('href', "https://t.me/+3rFqfNFuc8dlZWRl");
+                }
+            });
+            console.log('✅ Final verification: Telegram buttons use link:', "https://t.me/+3rFqfNFuc8dlZWRl");
         });
         
-        console.log('🚀 All events active | Telegram link updated: ', TELEGRAM_LINK);
+        console.log('🚀 All systems ready — 2 Telegram buttons + 1 Subscribe button, Meta Pixel active, link:', TELEGRAM_LINK);
     })();
 </script>
 
-<!-- Fallback: Ensure fbq is never undefined, plus extra safety for Meta Pixel loading -->
+<!-- Fallback: Ensure fbq never undefined (extra safety layer) -->
 <script>
     (function() {
         if (typeof fbq === 'undefined') {
             window.fbq = function() {
-                console.warn('Fallback fbq called with args:', arguments);
+                console.warn('Meta Pixel fallback triggered:', arguments);
             };
-            console.warn('Meta Pixel fallback initialized (fbq not loaded correctly)');
+            console.warn('fbq was missing, fallback installed');
         }
         
-        // Additional listener for dynamic or third-party scripts - nothing heavy
-        // Ensure telegram links open in new tab securely (already has target="_blank")
-        const allExternalLinks = document.querySelectorAll('a[href*="t.me"]');
-        allExternalLinks.forEach(link => {
-            if (!link.hasAttribute('rel')) {
-                link.setAttribute('rel', 'noopener noreferrer');
-            }
+        // Additional integrity: ensure all external Telegram links have security attributes
+        const allTelegramAnchors = document.querySelectorAll('a[href*="t.me"]');
+        allTelegramAnchors.forEach(anchor => {
+            anchor.setAttribute('rel', 'noopener noreferrer');
+            anchor.setAttribute('target', '_blank');
         });
+        
+        // Also if any button has data-track attributes we ensure click tracking works even if dynamically loaded
+        const dynamicTrackers = document.querySelectorAll('[data-track]');
+        console.log(`Found ${dynamicTrackers.length} elements with data-track attributes for analytics.`);
     })();
 </script>
 
+<!-- Ensure the subscribe button event is robust if re-initialized by any script -->
 </body>
 </html>
